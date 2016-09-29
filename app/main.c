@@ -27,7 +27,7 @@ at30ts74_t tmp;
 mma7660_t acc;
 uint32_t sample_counter;
 
-typedef struct {
+typedef struct __attribute__((packed)) {
   uint16_t type;
   int8_t flags; //which of the fields below exist, bit 0 is acc_x
   int16_t acc_x;

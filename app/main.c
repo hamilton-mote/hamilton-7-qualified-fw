@@ -17,7 +17,7 @@
 #include <periph/i2c.h>
 
 
-#define SAMPLE_INTERVAL (5000000UL)
+#define SAMPLE_INTERVAL (2000000UL)
 #define ACC_EVERY_MASK 15
 #define TYPE_FIELD 4
 

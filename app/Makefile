@@ -17,7 +17,7 @@ USEMODULE += xtimer
 USEMODULE += gnrc_netdev_default
 USEMODULE += auto_init_gnrc_netif
 # Specify the mandatory networking modules for IPv6 and UDP
-USEMODULE += gnrc_ipv6_router_default
+USEMODULE += gnrc_ipv6
 USEMODULE += gnrc_udp
 # Add also the shell, some shell commands
 USEMODULE += netstats_l2

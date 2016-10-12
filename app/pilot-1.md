@@ -1,6 +1,6 @@
 # You are curious
 
-If you are reading this ou have discovered a hamilton-7 from pilot-1. This is a
+If you are reading this you have discovered a hamilton-7 from pilot-1. This is a
 very early prototype of the hamilton-7 (29 September 2016). This mote samples
 temperature once every 10 seconds and immediately sends it out.
 

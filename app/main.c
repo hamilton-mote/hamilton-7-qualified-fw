@@ -131,13 +131,10 @@ int main(void)
     uint8_t radio_num = gnrc_netif_get(radio);
     while (1) {
       sample(&m);
-      //netopt_state_t radio_state = NETOPT_STATE_IDLE;
-   	  //for (i=0; i < radio_num; i++)
-   	  //    gnrc_netapi_set(radio[i], NETOPT_STATE, 0, &radio_state, sizeof(netopt_state_t));
       netopt_state_t radio_state = NETOPT_STATE_SLEEP;
       send_udp("ff02::1",4747,(uint8_t*)&m,sizeof(measurement_t));
       for (int i=0; i < radio_num; i++)
-          gnrc_netapi_set(radio[i], NETOPT_STATE, 0, &radio_state, sizeof(netopt_state_t));
+        gnrc_netapi_set(radio[i], NETOPT_STATE, 0, &radio_state, sizeof(netopt_state_t));
       xtimer_usleep(SAMPLE_INTERVAL);
     }
 

@@ -1,5 +1,3 @@
 # pilot-2
 
-```
-0x0004 Kattt & Boban
-0x000a Kattt & Boban
+A deployment of sensors in 465 Soda Hall with the objective of determining occupant thermal comfort. The deployment has not yet been turned on, this page will be updated once it has been.

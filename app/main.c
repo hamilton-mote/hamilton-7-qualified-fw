@@ -16,8 +16,8 @@
 #include <periph/gpio.h>
 #include <periph/i2c.h>
 
-
-#define SAMPLE_INTERVAL (2000000UL)
+#define SAMPLE_INTERVAL (10000000UL)
+#define SAMPLE_JITTER   ( 2000000UL)
 #define ACC_EVERY_MASK 15
 #define TYPE_FIELD 4
 
@@ -122,9 +122,19 @@ void sample(measurement_t *m) {
     //printf("[%lu] temperature: %luC / accel %d %d %d\n", xtimer_usec_from_ticks(xtimer_now()), temp, x, y, z);
 }
 
+uint32_t interval_with_jitter(void)
+{
+    int32_t t = SAMPLE_INTERVAL;
+    t += rand() % SAMPLE_JITTER;
+    t -= SAMPLE_JITTER / 2;
+    return (uint32_t)t;
+}
 
 int main(void)
 {
+    //This value is good randomness and unique per mote
+    srand(*((uint32_t*)fb_aes128_key));
+
     measurement_t m;
     low_power_init();
     kernel_pid_t radio[GNRC_NETIF_NUMOF];
@@ -135,7 +145,7 @@ int main(void)
       send_udp("ff02::1",4747,(uint8_t*)&m,sizeof(measurement_t));
       for (int i=0; i < radio_num; i++)
         gnrc_netapi_set(radio[i], NETOPT_STATE, 0, &radio_state, sizeof(netopt_state_t));
-      xtimer_usleep(SAMPLE_INTERVAL);
+      xtimer_usleep(interval_with_jitter());
     }
 
     return 0;

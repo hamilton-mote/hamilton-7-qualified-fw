@@ -26,7 +26,7 @@ USEMODULE += netstats_ipv6
 # Comment this out to disable code in RIOT that does safety checking
 # which is not needed in a production environment but helps in the
 # development process:
-CFLAGS += -DDEVELHELP
+# CFLAGS += -DDEVELHELP
 
 DEFAULT_CHANNEL = 25
 CFLAGS += -DDEFAULT_CHANNEL=$(DEFAULT_CHANNEL)

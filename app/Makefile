@@ -1,5 +1,5 @@
 APPLICATION = hamilton_7_qfw
-RIOTBASE = $(CURDIR)/../RIOT-OS
+RIOTBASE = /home/hskim/Desktop/RIOT-OS#$(CURDIR)/../RIOT-OS
 BOARD = hamilton
 USEMODULE += rtt_stdio
 CFLAGS += -DRTT_STDIO_DISABLE_STDIN
@@ -10,7 +10,6 @@ USEMODULE += at86rf233
 # Sensors
 USEMODULE += at30ts74 # temperature sensor
 USEMODULE += mma7660 # accelerometer
-
 USEMODULE += xtimer
 
 # networking

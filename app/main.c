@@ -15,16 +15,18 @@
 #include <mma7660.h>
 #include <periph/gpio.h>
 #include <periph/i2c.h>
+#include <periph/adc.h>
 
 
-#define SAMPLE_INTERVAL (2000000UL)
+#define SAMPLE_INTERVAL (2000000UL)//1000000UL)
 #define ACC_EVERY_MASK 15
 #define TYPE_FIELD 4
 
 void send_udp(char *addr_str, uint16_t port, uint8_t *data, uint16_t datalen);
 
 at30ts74_t tmp;
-mma7660_t acc;
+mma7660_t  acc;
+adc_t ADC_0;
 uint32_t sample_counter;
 
 typedef struct {
@@ -48,7 +50,8 @@ void sample(measurement_t *m);
 #define FLAG_HAS_TEMP   0x08
 #define FLAG_HAS_LUX    0x10
 #define FLAG_HAS_UPTIME 0x20
-#define DO_ACC (0)
+#define DO_ACC (1)
+#define DO_LIGHT (1)
 
 void low_power_init(void) {
     // Light sensor off
@@ -67,6 +70,9 @@ void low_power_init(void) {
       printf("Failed to set idle mode\n");
 	  if (mma7660_config_samplerate(&acc, MMA7660_SR_AM1, MMA7660_SR_AW1, 1) != 0)
       printf("Failed to config SR\n");
+
+	if (adc_init(ADC_0) !=0)
+	  printf("Failed to init ADC\n");
 }
 
 void sample(measurement_t *m) {
@@ -118,8 +124,14 @@ void sample(measurement_t *m) {
       m->acc_z = z;
     }
 
+	#if DO_LIGHT	
+    gpio_write(GPIO_PIN(0, 28), 0);
+    m->lux = (int32_t)adc_sample(ADC_0, ADC_RES_12BIT);
+    gpio_write(GPIO_PIN(0, 28), 1);
+	#endif
 
-    //printf("[%lu] temperature: %luC / accel %d %d %d\n", xtimer_usec_from_ticks(xtimer_now()), temp, x, y, z);
+    printf("[%lu] temperature: %luC / accel %d %d %d / light %lu\n", 
+			xtimer_usec_from_ticks(xtimer_now()), temp, x, y, z, m->lux);
 }
 
 
@@ -131,11 +143,8 @@ int main(void)
     uint8_t radio_num = gnrc_netif_get(radio);
     while (1) {
       sample(&m);
-      //netopt_state_t radio_state = NETOPT_STATE_IDLE;
-   	  //for (i=0; i < radio_num; i++)
-   	  //    gnrc_netapi_set(radio[i], NETOPT_STATE, 0, &radio_state, sizeof(netopt_state_t));
-      netopt_state_t radio_state = NETOPT_STATE_SLEEP;
       send_udp("ff02::1",4747,(uint8_t*)&m,sizeof(measurement_t));
+      netopt_state_t radio_state = NETOPT_STATE_SLEEP;
       for (int i=0; i < radio_num; i++)
           gnrc_netapi_set(radio[i], NETOPT_STATE, 0, &radio_state, sizeof(netopt_state_t));
       xtimer_usleep(SAMPLE_INTERVAL);

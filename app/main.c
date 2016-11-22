@@ -26,7 +26,6 @@ void send_udp(char *addr_str, uint16_t port, uint8_t *data, uint16_t datalen);
 
 at30ts74_t tmp;
 mma7660_t  acc;
-adc_t ADC_0;
 uint32_t sample_counter;
 
 typedef struct {
@@ -71,7 +70,7 @@ void low_power_init(void) {
 	  if (mma7660_config_samplerate(&acc, MMA7660_SR_AM1, MMA7660_SR_AW1, 1) != 0)
       printf("Failed to config SR\n");
 
-	if (adc_init(ADC_0) !=0)
+	if (adc_init(ADC_0_INPUT_CHANNEL) !=0)
 	  printf("Failed to init ADC\n");
 }
 
@@ -81,6 +80,7 @@ void sample(measurement_t *m) {
     int8_t y = 0;
     int8_t z = 0;
     uint8_t do_acc = 0;
+	int32_t light = 0; 
     #if DO_ACC
     if ((sample_counter & (ACC_EVERY_MASK)) == 0) {
       do_acc = 1;
@@ -109,7 +109,19 @@ void sample(measurement_t *m) {
       }
     }
     #endif
-    sample_counter++;
+    
+	#if DO_LIGHT	
+    gpio_write(GPIO_PIN(0, 28), 0);
+    light = (int32_t)adc_sample(ADC_0_INPUT_CHANNEL, ADC_RES_12BIT);
+	if (light == -1) {
+		printf("Failed to read ADC\n");
+		return;
+	}
+    gpio_write(GPIO_PIN(0, 28), 1);
+	#endif
+
+
+	sample_counter++;
 
 
     m->type = TYPE_FIELD;
@@ -123,15 +135,10 @@ void sample(measurement_t *m) {
       m->acc_y = y;
       m->acc_z = z;
     }
-
-	#if DO_LIGHT	
-    gpio_write(GPIO_PIN(0, 28), 0);
-    m->lux = (int32_t)adc_sample(ADC_0, ADC_RES_12BIT);
-    gpio_write(GPIO_PIN(0, 28), 1);
-	#endif
+	m->lux = light;
 
     printf("[%lu] temperature: %luC / accel %d %d %d / light %lu\n", 
-			xtimer_usec_from_ticks(xtimer_now()), temp, x, y, z, m->lux);
+			xtimer_usec_from_ticks(xtimer_now()), temp, x, y, z, light);
 }
 
 
